@@ -1,7 +1,9 @@
 import { Text, View, StyleSheet, FlatList } from 'react-native';
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import Voci from './models/voci';
 import VociItem from '../components/VociItem';
+import { useRouter } from 'expo-router';
+import { Pressable } from 'react-native';
 
 const vociList: Voci[] = [
     { term: 'fish', translation: 'Fisch' },
@@ -16,6 +18,8 @@ const vociList: Voci[] = [
   ];
 
 export default function Index() {
+  const router = useRouter();
+
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
       <MaterialIcons name="book" size={64} color="#ccc" />
@@ -28,12 +32,24 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.title}>VocZLI</Text>
       <Text style={styles.subtitle}>Meine Vokabel-Lern-App</Text>
+
       <FlatList
         data={vociList}
         keyExtractor={(item) => item.term}
         renderItem={({ item }) => <VociItem voci={item} />}
         ListEmptyComponent={renderEmptyComponent}
       />
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.fab,
+          { opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.95 : 1 }] },
+        ]}
+        onPress={() => router.push("/learn")}
+      >
+        <Ionicons name="play" size={28} color="#fff" />
+      </Pressable>
+
     </View>
   );
 }
@@ -72,5 +88,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#bbb",
     marginTop: 8,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#005380",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  fabText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
