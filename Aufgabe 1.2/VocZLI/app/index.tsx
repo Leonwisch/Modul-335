@@ -1,5 +1,7 @@
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, FlatList } from 'react-native';
+import { MaterialIcons } from "@expo/vector-icons";
 import Voci from './models/voci';
+import VociItem from '../components/VociItem';
 
 const vociList: Voci[] = [
     { term: 'fish', translation: 'Fisch' },
@@ -14,30 +16,61 @@ const vociList: Voci[] = [
   ];
 
 export default function Index() {
+  const renderEmptyComponent = () => (
+    <View style={styles.emptyContainer}>
+      <MaterialIcons name="book" size={64} color="#ccc" />
+      <Text style={styles.emptyText}>Noch keine Vokabeln vorhanden</Text>
+      <Text style={styles.emptySubtext}>Füge deine ersten Vokabeln hinzu!</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>VocZLI</Text>
-      <Text style={styles.subtitleText}>Meine Vokabel-Lern-App</Text>
+      <Text style={styles.title}>VocZLI</Text>
+      <Text style={styles.subtitle}>Meine Vokabel-Lern-App</Text>
+      <FlatList
+        data={vociList}
+        keyExtractor={(item) => item.term}
+        renderItem={({ item }) => <VociItem voci={item} />}
+        ListEmptyComponent={renderEmptyComponent}
+      />
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 16,
   },
-  titleText: {
-    color: '#fff',
-    fontSize: 36,           // Schön gross für den Titel
-    fontWeight: 'bold',     // Fett gedruckt
-    marginBottom: 8,        // Ein bisschen Abstand zum Untertitel
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
   },
-  subtitleText: {
-    color: '#ccc',          // Etwas helleres Grau für den Kontrast
-    fontSize: 18,           // Etwas kleiner als der Titel
-    fontStyle: 'italic',    // Kursiv sieht bei Untertiteln oft gut aus
+  subtitle: {
+    fontSize: 18,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 60,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#999",
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 8,
   },
 });

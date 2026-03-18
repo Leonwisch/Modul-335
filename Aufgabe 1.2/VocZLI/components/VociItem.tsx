@@ -1,28 +1,39 @@
-import { Text, View, StyleSheet, FlatList } from 'react-native';
-import Voci from '../app/models/voci';
+import { Text, View, StyleSheet } from "react-native";
+import Voci from "../app/models/voci";
 
-export default function VociItem({ item }: { item: Voci }) {
+interface VociItemProps {
+  voci: Voci;
+}
+
+export default function VociItem({ voci }: VociItemProps) {
   return (
-    <View style={styles.itemContainer}>
-      <Text style={styles.termText}>{item.term}</Text>
-      <Text style={styles.translationText}>{item.translation}</Text>
+    <View style={styles.card}>
+      <Text style={styles.term}>{voci.term}</Text>
+      <Text style={styles.translation}>{voci.translation}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  itemContainer: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#444',
+  card: {
+    backgroundColor: "#fff",
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  termText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+  term: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#333",
   },
-  translationText: {
-    color: '#aaa',
-    fontSize: 14,
+  translation: {
+    fontSize: 16,
+    color: "#666",
   },
 });
