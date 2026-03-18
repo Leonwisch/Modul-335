@@ -1,23 +1,12 @@
 import { Text, View, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
-import Voci from './models/voci';
 import VociItem from '../components/VociItem';
 import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
-
-const vociList: Voci[] = [
-    { term: 'fish', translation: 'Fisch' },
-    { term: 'glass', translation: 'Glas' },
-    { term: 'house', translation: 'Haus' },
-    { term: 'apple', translation: 'Apfel' },
-    { term: 'bread', translation: 'Brot' },
-    { term: 'cat', translation: 'Katze' },
-    { term: 'dog', translation: 'Hund' },
-    { term: 'egg', translation: 'Ei' },
-    
-  ];
+import { useVoci } from '../context/vociContext';
 
 export default function Index() {
+  const { vociList } = useVoci();
   const router = useRouter();
 
   const renderEmptyComponent = () => (

@@ -1,20 +1,11 @@
 import { Text, View, StyleSheet, Pressable, Alert, Animated } from "react-native";
-import Voci from '../app/models/voci';
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "expo-router";
+import { useVoci } from '../context/vociContext';
 
-const vociList: Voci[] = [
-    { term: 'fish', translation: 'Fisch' },
-    { term: 'glass', translation: 'Glas' },
-    { term: 'house', translation: 'Haus' },
-    { term: 'apple', translation: 'Apfel' },
-    { term: 'bread', translation: 'Brot' },
-    { term: 'cat', translation: 'Katze' },
-    { term: 'dog', translation: 'Hund' },
-    { term: 'egg', translation: 'Ei' },
-];
 
 export default function LearnScreen() {
+    const { vociList } = useVoci();
     const router = useRouter();
     
     const [currentIndex, setCurrentIndex] = useState(0);
