@@ -20,9 +20,6 @@ export default function AddVociScreen() {
       
       <VociDetail onSave={handleAdd} />
       
-      <Text style={styles.infoText}>
-        Die Vokabel wird automatisch deiner Liste hinzugefügt.
-      </Text>
     </View>
   );
 }

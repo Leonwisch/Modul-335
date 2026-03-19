@@ -3,90 +3,110 @@ import { View, Text, TextInput, StyleSheet, Pressable, Alert } from 'react-nativ
 import Voci from '../app/models/voci';
 
 interface VociDetailProps {
-  onSave: (voci: Voci) => void;
+    voci?: Voci;
+    onSave: (voci: Voci) => void;
+    onCancel?: () => void;
+    onDelete?: () => void;    
 }
 
-export default function VociDetail({ onSave }: VociDetailProps) {
-  const [term, setTerm] = useState('');
-  const [translation, setTranslation] = useState('');
+export default function VociDetail({ voci, onSave, onCancel, onDelete }: VociDetailProps) {
+  const [term, setTerm] = useState(voci?.term ?? "");
+  const [translation, setTranslation] = useState(voci?.translation ?? "");
 
-  const handleSave = () => {
-    if (term.trim() === '' || translation.trim() === '') {
-      Alert.alert("Fehler", "Bitte fülle beide Felder aus.");
+  const isEditMode = voci !== undefined;
+
+  function handleSave() {
+    if (!term.trim() || !translation.trim()) {
+      Alert.alert("Fehler", "Bitte füllen Sie beide Felder aus.");
       return;
     }
 
-    const newVoci: Voci = {
-      term: term.trim(),
-      translation: translation.trim(),
-    };
+    onSave({ term: term.trim(), translation: translation.trim() });
+  }
 
-    onSave(newVoci);
-
-    setTerm('');
-    setTranslation('');
-  };
+  function handleDelete() {
+    Alert.alert(
+      "Vokabel löschen",
+      `Möchten Sie "${voci?.term}" wirklich löschen?`,
+      [
+        { text: "Abbrechen", style: "cancel" },
+        { text: "Löschen", style: "destructive", onPress: onDelete },
+      ]
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Begriff (Englisch)</Text>
       <TextInput
         style={styles.input}
-        placeholder="z.B. Tree"
+        placeholder="Begriff"
         value={term}
         onChangeText={setTerm}
       />
-
-      <Text style={styles.label}>Übersetzung (Deutsch)</Text>
       <TextInput
         style={styles.input}
-        placeholder="z.B. Baum"
+        placeholder="Übersetzung"
         value={translation}
         onChangeText={setTranslation}
       />
-
-      <Pressable style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Vokabel speichern</Text>
+      <Pressable
+        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        onPress={handleSave}
+      >
+        <Text style={styles.buttonText}>Speichern</Text>
       </Pressable>
+      {isEditMode && (
+        <>
+          <Pressable
+            style={({ pressed }) => [styles.button, styles.buttonCancel, pressed && styles.buttonPressed]}
+            onPress={onCancel}
+          >
+            <Text style={styles.buttonText}>Abbrechen</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.button, styles.buttonDelete, pressed && styles.buttonPressed]}
+            onPress={handleDelete}
+          >
+            <Text style={styles.buttonText}>Löschen</Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#666',
-    marginBottom: 5,
+    padding: 16,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 12,
+    borderColor: "#cccccc",
     borderRadius: 8,
+    padding: 12,
     fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
+    marginBottom: 12,
+    backgroundColor: "#ffffff",
   },
-  saveButton: {
-    backgroundColor: '#25292e',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
+  button: {
+    backgroundColor: "#1a7a4a",
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
   },
-  saveButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  buttonCancel: {
+    backgroundColor: "#888888",
+  },
+  buttonDelete: {
+    backgroundColor: "#cc3333",
+  },
+  buttonPressed: {
+    opacity: 0.75,
+  },
+  buttonText: {
+    color: "#ffffff",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
