@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "VocZLI",
-    "slug": "VocZLI",
+    "name": "Accelerometer",
+    "slug": "Accelerometer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "voczli",
+    "scheme": "accelerometer",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -36,20 +36,6 @@
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
-          }
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends.",
-          "colors": {
-            "cropToolbarColor": "#000000"
-          },
-          "dark": {
-            "colors": {
-              "cropToolbarColor": "#000000"
-            }
           }
         }
       ]
