@@ -1,5 +1,5 @@
-// app/index.tsx
 import React, { useState } from 'react';
+import { Stack } from 'expo-router';
 import { View, StyleSheet, TextInput, TouchableOpacity, FlatList, Text } from 'react-native';
 import { useStudents } from '../context/studentContext';
 import { StudentCard } from '../components/studentCard'; 
@@ -19,6 +19,7 @@ export default function IndexScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: 'Schülernotizen' }} />
       <TextInput
         style={styles.searchBar}
         placeholder="Suche..."
