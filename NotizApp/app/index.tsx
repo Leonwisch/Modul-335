@@ -33,6 +33,7 @@ export default function IndexScreen() {
           <StudentCard 
             item={item} 
             onPress={(id) => router.push(`./student/${id}`)} 
+            onEditPress={(id) => router.push(`./changeStudent/${id}`)}
           />
         )}
         contentContainerStyle={{ paddingBottom: 100 }}

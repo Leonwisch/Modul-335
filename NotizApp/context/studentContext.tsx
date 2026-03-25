@@ -20,7 +20,9 @@ export interface Student {
 interface StudentContextType {
     students: Student[];
     loading: boolean;
+    deleteStudent: (id: string) => Promise<void>;
     addStudent: (firstName: string, lastName: string) => Promise<void>;
+    updateStudent: (id: string, firstName: string, lastName: string) => Promise<void>;
     updateGeneralNotes: (studentId: string, text: string) => Promise<void>;
     addDailyNote: (studentId: string, content: string) => Promise<void>;
 }
@@ -67,6 +69,18 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await persistData([...students, newStudent]);
     };
 
+    const updateStudent = async (id: string, firstName: string, lastName: string) => {
+        const updatedList = students.map(s =>
+            s.id === id ? { ...s, firstName, lastName } : s
+        );
+        await persistData(updatedList);
+    };
+
+    const deleteStudent = async (id: string) => {
+    const newList = students.filter(s => s.id !== id);
+    await persistData(newList);
+};
+
     const updateGeneralNotes = async (studentId: string, text: string) => {
         const updatedList = students.map(s => {
             if (s.id === studentId) {
@@ -93,7 +107,7 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     return (
-        <StudentContext.Provider value={{ students, loading, addStudent, updateGeneralNotes, addDailyNote }}>
+        <StudentContext.Provider value={{ students, loading, addStudent, updateGeneralNotes, addDailyNote, updateStudent, deleteStudent }}>
             {children}
         </StudentContext.Provider>
     );
