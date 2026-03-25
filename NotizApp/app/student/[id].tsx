@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TextInput, 
+  TouchableOpacity, 
+  Modal, 
+  KeyboardAvoidingView, 
+  Platform,
+  Pressable 
+} from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useStudents } from '../../context/studentContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +36,7 @@ export default function StudentDetailScreen() {
         );
     }
 
+    // Sortierung: Favoriten nach oben
     const sortedNotes = [...student.dailyNotes].sort((a, b) => {
         if (a.isFavorite === b.isFavorite) return 0;
         return a.isFavorite ? -1 : 1;
@@ -103,35 +115,45 @@ export default function StudentDetailScreen() {
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.modalOverlay}
-                >
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Neue Notiz für heute</Text>
-                            <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                <Ionicons name="close" size={24} color="#333" />
-                            </TouchableOpacity>
+                <View style={styles.modalOverlay}>
+                    <Pressable 
+                        style={{ flex: 1, width: '100%' }} 
+                        onPress={() => setModalVisible(false)} 
+                    />
+
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    >
+                        <View style={styles.modalWhiteWrapper}>
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Neue Notiz für heute</Text>
+                                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                        <Ionicons name="close" size={24} color="#333" />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <TextInput
+                                    multiline
+                                    autoFocus={true}
+                                    placeholder="Was ist heute passiert?..."
+                                    style={styles.modalInput}
+                                    value={newNoteContent}
+                                    onChangeText={setNewNoteContent}
+                                />
+
+                                <TouchableOpacity
+                                    style={styles.modalSaveBtn}
+                                    onPress={handleSaveDailyNote}
+                                >
+                                    <Text style={styles.modalSaveBtnText}>Notiz speichern</Text>
+                                </TouchableOpacity>
+                                
+                                <View style={{ height: Platform.OS === 'android' ? 20 : 40 }} />
+                            </View>
                         </View>
-
-                        <TextInput
-                            multiline
-                            autoFocus={true}
-                            placeholder="Was ist heute passiert? Fortschritte, Herausforderungen..."
-                            style={styles.modalInput}
-                            value={newNoteContent}
-                            onChangeText={setNewNoteContent}
-                        />
-
-                        <TouchableOpacity
-                            style={styles.modalSaveBtn}
-                            onPress={handleSaveDailyNote}
-                        >
-                            <Text style={styles.modalSaveBtnText}>Notiz speichern</Text>
-                        </TouchableOpacity>
-                    </View>
-                </KeyboardAvoidingView>
+                    </KeyboardAvoidingView>
+                </View>
             </Modal>
         </View>
     );
@@ -150,7 +172,7 @@ const styles = StyleSheet.create({
         borderColor: '#333',
         borderRadius: 15,
         padding: 15,
-        minHeight: 150,
+        minHeight: 120,
         backgroundColor: '#fbfbfb',
     },
     textInput: { fontSize: 16, lineHeight: 24, textAlignVertical: 'top' },
@@ -158,22 +180,21 @@ const styles = StyleSheet.create({
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
     noteItem: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         padding: 18,
         borderWidth: 1,
         borderColor: '#eee',
         borderRadius: 15,
         marginBottom: 12,
         backgroundColor: '#fff',
+        alignItems: 'center'
     },
     favoriteNoteItem: {
         borderColor: '#FFD700',
-        backgroundColor: '#FFFDF0', 
+        backgroundColor: '#FFFDF0',
         borderWidth: 1.5,
     },
     noteContentWrapper: { flex: 1, marginRight: 10 },
-    noteHeader: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 5 },
+    noteHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
     noteDate: { fontSize: 12, fontWeight: '600', color: '#999', textTransform: 'uppercase' },
     notePreview: { fontSize: 16, color: '#333', lineHeight: 22 },
     emptyContainer: { alignItems: 'center', marginTop: 30, padding: 20 },
@@ -182,7 +203,7 @@ const styles = StyleSheet.create({
     fab: {
         position: 'absolute',
         right: 25,
-        bottom: 50,
+        bottom: 40,
         backgroundColor: '#b2fab4',
         width: 60,
         height: 60,
@@ -199,16 +220,17 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        justifyContent: 'flex-end',
         backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
     },
-    modalContent: {
+    modalWhiteWrapper: {
         backgroundColor: '#fff',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
+    },
+    modalContent: {
         padding: 25,
-        minHeight: '50%',
-        maxHeight: '80%',
+        minHeight: 300,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -218,23 +240,22 @@ const styles = StyleSheet.create({
     },
     modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
     modalInput: {
-        flex: 1,
         fontSize: 16,
         lineHeight: 24,
         textAlignVertical: 'top',
         marginBottom: 20,
-        padding: 10,
+        padding: 15,
         backgroundColor: '#f9f9f9',
         borderRadius: 10,
+        minHeight: 150,
     },
     modalSaveBtn: {
         backgroundColor: '#b2fab4',
-        padding: 15,
-        borderRadius: 10,
+        padding: 16,
+        borderRadius: 12,
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#333',
-        marginBottom: 10,
     },
     modalSaveBtnText: { fontWeight: 'bold', fontSize: 16, color: '#333' },
 });
