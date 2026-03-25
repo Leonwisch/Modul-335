@@ -6,6 +6,7 @@ export interface DailyNote {
     date: string;
     content: string;
     audioPath?: string;
+    isFavorite: boolean;
 }
 
 export interface Student {
@@ -27,6 +28,7 @@ interface StudentContextType {
     addDailyNote: (studentId: string, content: string) => Promise<void>;
     updateDailyNote: (studentId: string, noteId: string, newContent: string) => Promise<void>;
     deleteDailyNote: (studentId: string, noteId: string) => Promise<void>;
+    toggleFavoriteNote: (studentId: string, noteId: string) => Promise<void>;
 }
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
@@ -99,7 +101,8 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 const newNote: DailyNote = {
                     id: Date.now().toString(),
                     date: new Date().toLocaleDateString('de-DE'),
-                    content
+                    content,
+                    isFavorite: false,
                 };
                 return { ...s, dailyNotes: [newNote, ...s.dailyNotes] };
             }
@@ -132,8 +135,21 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await persistData(updatedList);
     };
 
+    const toggleFavoriteNote = async (studentId: string, noteId: string) => {
+        const updatedList = students.map(s => {
+            if (s.id === studentId) {
+                const updatedNotes = s.dailyNotes.map(n =>
+                    n.id === noteId ? { ...n, isFavorite: !n.isFavorite } : n
+                );
+                return { ...s, dailyNotes: updatedNotes };
+            }
+            return s;
+        });
+        await persistData(updatedList);
+    };
+
     return (
-        <StudentContext.Provider value={{ students, loading, addStudent, updateGeneralNotes, addDailyNote, updateStudent, deleteStudent, updateDailyNote, deleteDailyNote }}>
+        <StudentContext.Provider value={{ students, loading, toggleFavoriteNote, addStudent, updateGeneralNotes, addDailyNote, updateStudent, deleteStudent, updateDailyNote, deleteDailyNote }}>
             {children}
         </StudentContext.Provider>
     );

@@ -25,9 +25,13 @@ export default function StudentDetailScreen() {
         );
     }
 
+    const sortedNotes = [...student.dailyNotes].sort((a, b) => {
+        if (a.isFavorite === b.isFavorite) return 0;
+        return a.isFavorite ? -1 : 1;
+    });
+
     const handleSaveDailyNote = async () => {
         if (newNoteContent.trim() === '') return;
-
         await addDailyNote(student.id, newNoteContent);
         setNewNoteContent('');
         setModalVisible(false);
@@ -38,7 +42,6 @@ export default function StudentDetailScreen() {
             <Stack.Screen options={{ title: `${student.firstName} ${student.lastName}` }} />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-
                 <Text style={styles.sectionTitle}>Allgemeine Notizen</Text>
                 <View style={styles.generalNotesCard}>
                     <TextInput
@@ -57,23 +60,25 @@ export default function StudentDetailScreen() {
                     <Text style={styles.sectionTitle}>Tagesverlauf</Text>
                 </View>
 
-                {student.dailyNotes.length === 0 ? (
+                {sortedNotes.length === 0 ? (
                     <View style={styles.emptyContainer}>
                         <Ionicons name="document-text-outline" size={50} color="#eee" />
                         <Text style={styles.emptyText}>Noch keine Tagesnotizen vorhanden.</Text>
                         <Text style={styles.emptySubText}>Tippe auf das '+', um die erste Notiz zu schreiben.</Text>
                     </View>
                 ) : (
-                    student.dailyNotes.map((note) => (
+                    sortedNotes.map((note) => (
                         <TouchableOpacity
                             key={note.id}
-                            style={styles.noteItem}
-                            // HIER ist die wichtige Ergänzung:
+                            style={[styles.noteItem, note.isFavorite && styles.favoriteNoteItem]}
                             onPress={() => router.push(`/student/editNode/${student.id}/${note.id}`)}
                         >
                             <View style={styles.noteContentWrapper}>
                                 <View style={styles.noteHeader}>
                                     <Text style={styles.noteDate}>{note.date}</Text>
+                                    {note.isFavorite && (
+                                        <Ionicons name="star" size={16} color="#FFD700" style={{marginLeft: 5}} />
+                                    )}
                                 </View>
                                 <Text numberOfLines={3} style={styles.notePreview}>{note.content}</Text>
                             </View>
@@ -162,8 +167,13 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         backgroundColor: '#fff',
     },
+    favoriteNoteItem: {
+        borderColor: '#FFD700',
+        backgroundColor: '#FFFDF0', 
+        borderWidth: 1.5,
+    },
     noteContentWrapper: { flex: 1, marginRight: 10 },
-    noteHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 },
+    noteHeader: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 5 },
     noteDate: { fontSize: 12, fontWeight: '600', color: '#999', textTransform: 'uppercase' },
     notePreview: { fontSize: 16, color: '#333', lineHeight: 22 },
     emptyContainer: { alignItems: 'center', marginTop: 30, padding: 20 },
@@ -172,7 +182,7 @@ const styles = StyleSheet.create({
     fab: {
         position: 'absolute',
         right: 25,
-        bottom: 25,
+        bottom: 50,
         backgroundColor: '#b2fab4',
         width: 60,
         height: 60,

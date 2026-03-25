@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useStudents } from '../../../../context/studentContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function EditNoteScreen() {
   const { studentId, noteId } = useLocalSearchParams();
-  const { students, updateDailyNote, deleteDailyNote } = useStudents();
+  const { students, updateDailyNote, deleteDailyNote, toggleFavoriteNote } = useStudents();
   const router = useRouter();
 
   const student = students.find(s => String(s.id) === String(studentId));
@@ -46,6 +47,10 @@ export default function EditNoteScreen() {
     router.back();
   };
 
+  const handleToggleFavorite = async () => {
+    await toggleFavoriteNote(student.id, note.id);
+  };
+
   const handleDelete = () => {
     Alert.alert("Löschen", "Soll dieser Eintrag wirklich entfernt werden?", [
       { text: "Abbrechen", style: "cancel" },
@@ -72,9 +77,19 @@ export default function EditNoteScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.headerInfo}>
-          <Text style={styles.dateLabel}>Eintrag vom {note.date}</Text>
-          <Text style={styles.studentName}>{student.firstName} {student.lastName}</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.headerInfo}>
+            <Text style={styles.dateLabel}>Eintrag vom {note.date}</Text>
+            <Text style={styles.studentName}>{student.firstName} {student.lastName}</Text>
+          </View>
+          
+          <TouchableOpacity onPress={handleToggleFavorite} style={styles.starButton}>
+            <Ionicons 
+              name={note.isFavorite ? "star" : "star-outline"} 
+              size={32} 
+              color={note.isFavorite ? "#FFD700" : "#ccc"} 
+            />
+          </TouchableOpacity>
         </View>
 
         <TextInput
@@ -116,8 +131,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  headerInfo: {
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 15
+  },
+  headerInfo: {
+    flex: 1
+  },
+  starButton: {
+    padding: 5,
   },
   dateLabel: {
     fontSize: 12,
