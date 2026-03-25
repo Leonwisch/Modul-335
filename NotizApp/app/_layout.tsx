@@ -1,5 +1,10 @@
 import { Stack } from "expo-router";
+import { StudentProvider } from "../context/studentContext";
 
 export default function RootLayout() {
-  return <Stack />;
+  return (
+    <StudentProvider>
+      <Stack />
+    </StudentProvider>
+  );
 }

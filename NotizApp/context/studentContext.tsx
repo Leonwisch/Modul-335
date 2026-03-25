@@ -12,6 +12,7 @@ export interface Student {
     id: string;
     firstName: string;
     lastName: string;
+    avatarUri?: string;
     generalNotes: string;
     dailyNotes: DailyNote[];
 }
