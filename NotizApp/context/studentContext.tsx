@@ -25,6 +25,8 @@ interface StudentContextType {
     updateStudent: (id: string, firstName: string, lastName: string) => Promise<void>;
     updateGeneralNotes: (studentId: string, text: string) => Promise<void>;
     addDailyNote: (studentId: string, content: string) => Promise<void>;
+    updateDailyNote: (studentId: string, noteId: string, newContent: string) => Promise<void>;
+    deleteDailyNote: (studentId: string, noteId: string) => Promise<void>;
 }
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
@@ -77,9 +79,9 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     const deleteStudent = async (id: string) => {
-    const newList = students.filter(s => s.id !== id);
-    await persistData(newList);
-};
+        const newList = students.filter(s => s.id !== id);
+        await persistData(newList);
+    };
 
     const updateGeneralNotes = async (studentId: string, text: string) => {
         const updatedList = students.map(s => {
@@ -106,8 +108,32 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await persistData(updatedList);
     };
 
+    const updateDailyNote = async (studentId: string, noteId: string, newContent: string) => {
+        const updatedList = students.map(s => {
+            if (s.id === studentId) {
+                const updatedNotes = s.dailyNotes.map(n =>
+                    n.id === noteId ? { ...n, content: newContent } : n
+                );
+                return { ...s, dailyNotes: updatedNotes };
+            }
+            return s;
+        });
+        await persistData(updatedList);
+    };
+
+    const deleteDailyNote = async (studentId: string, noteId: string) => {
+        const updatedList = students.map(s => {
+            if (s.id === studentId) {
+                const filteredNotes = s.dailyNotes.filter(n => n.id !== noteId);
+                return { ...s, dailyNotes: filteredNotes };
+            }
+            return s;
+        });
+        await persistData(updatedList);
+    };
+
     return (
-        <StudentContext.Provider value={{ students, loading, addStudent, updateGeneralNotes, addDailyNote, updateStudent, deleteStudent }}>
+        <StudentContext.Provider value={{ students, loading, addStudent, updateGeneralNotes, addDailyNote, updateStudent, deleteStudent, updateDailyNote, deleteDailyNote }}>
             {children}
         </StudentContext.Provider>
     );
