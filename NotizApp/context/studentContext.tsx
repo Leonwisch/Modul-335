@@ -5,6 +5,7 @@ export interface DailyNote {
     id: string;
     date: string;
     content: string;
+    title?: string;
     audioPath?: string;
     isFavorite: boolean;
 }
@@ -25,8 +26,8 @@ interface StudentContextType {
     addStudent: (firstName: string, lastName: string) => Promise<void>;
     updateStudent: (id: string, firstName: string, lastName: string) => Promise<void>;
     updateGeneralNotes: (studentId: string, text: string) => Promise<void>;
-    addDailyNote: (studentId: string, content: string) => Promise<void>;
-    updateDailyNote: (studentId: string, noteId: string, newContent: string) => Promise<void>;
+    addDailyNote: (studentId: string, content: string, title?: string) => Promise<void>; 
+    updateDailyNote: (studentId: string, noteId: string, newContent: string, title?: string) => Promise<void>;
     deleteDailyNote: (studentId: string, noteId: string) => Promise<void>;
     toggleFavoriteNote: (studentId: string, noteId: string) => Promise<void>;
 }
@@ -95,12 +96,13 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await persistData(updatedList);
     };
 
-    const addDailyNote = async (studentId: string, content: string) => {
+    const addDailyNote = async (studentId: string, content: string, title?: string) => { 
         const updatedList = students.map(s => {
             if (s.id === studentId) {
                 const newNote: DailyNote = {
                     id: Date.now().toString(),
                     date: new Date().toLocaleDateString('de-DE'),
+                    title: title || '',
                     content,
                     isFavorite: false,
                 };
@@ -111,12 +113,15 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await persistData(updatedList);
     };
 
-    const updateDailyNote = async (studentId: string, noteId: string, newContent: string) => {
-        const updatedList = students.map(s => {
+    const updateDailyNote = async (studentId: string, noteId: string, content: string, title?: string) => {
+        const updatedList = students.map((s) => {
             if (s.id === studentId) {
-                const updatedNotes = s.dailyNotes.map(n =>
-                    n.id === noteId ? { ...n, content: newContent } : n
-                );
+                const updatedNotes = s.dailyNotes.map((n) => {
+                    if (n.id === noteId) {
+                        return { ...n, content, title: title || '' };
+                    }
+                    return n;
+                });
                 return { ...s, dailyNotes: updatedNotes };
             }
             return s;

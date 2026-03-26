@@ -1,205 +1,190 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView
+    View, Text, StyleSheet, TextInput, TouchableOpacity,
+    ScrollView, KeyboardAvoidingView, Platform, Alert
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useStudents } from '../../../../context/studentContext';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function EditNoteScreen() {
-  const { studentId, noteId } = useLocalSearchParams();
-  const { students, updateDailyNote, deleteDailyNote, toggleFavoriteNote } = useStudents();
-  const router = useRouter();
+    const { studentId, noteId } = useLocalSearchParams();
+    const { students, updateDailyNote, deleteDailyNote, toggleFavoriteNote } = useStudents();
+    const router = useRouter();
 
-  const student = students.find(s => String(s.id) === String(studentId));
-  const note = student?.dailyNotes.find(n => String(n.id) === String(noteId));
+    const student = students.find(s => s.id === studentId);
+    const note = student?.dailyNotes.find(n => n.id === noteId);
 
-  const [content, setContent] = useState(note?.content || '');
+    const [title, setTitle] = useState(note?.title || '');
+    const [content, setContent] = useState(note?.content || '');
 
-  useEffect(() => {
-    if (note) {
-      setContent(note.content);
-    }
-  }, [note]);
-
-  if (!student || !note) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Notiz konnte nicht geladen werden.</Text>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backBtnText}>Zurück</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  const handleSave = async () => {
-    if (content.trim() === '') return;
-    await updateDailyNote(student.id, note.id, content);
-    router.back();
-  };
-
-  const handleToggleFavorite = async () => {
-    await toggleFavoriteNote(student.id, note.id);
-  };
-
-  const handleDelete = () => {
-    Alert.alert("Löschen", "Soll dieser Eintrag wirklich entfernt werden?", [
-      { text: "Abbrechen", style: "cancel" },
-      {
-        text: "Löschen",
-        style: "destructive",
-        onPress: async () => {
-          await deleteDailyNote(student.id, note.id);
-          router.back();
+    useEffect(() => {
+        if (note) {
+            setTitle(note.title || '');
+            setContent(note.content || '');
         }
-      }
-    ]);
-  };
+    }, [note]);
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'android' ? 30 : 0}
-    >
-      <Stack.Screen options={{ title: "Eintrag bearbeiten" }} />
+    if (!student || !note) {
+        return (
+            <View style={styles.center}>
+                <Text>Notiz nicht gefunden.</Text>
+            </View>
+        );
+    }
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.headerRow}>
-          <View style={styles.headerInfo}>
-            <Text style={styles.dateLabel}>Eintrag vom {note.date}</Text>
-            <Text style={styles.studentName}>{student.firstName} {student.lastName}</Text>
-          </View>
-          
-          <TouchableOpacity onPress={handleToggleFavorite} style={styles.starButton}>
-            <Ionicons 
-              name={note.isFavorite ? "star" : "star-outline"} 
-              size={32} 
-              color={note.isFavorite ? "#FFD700" : "#ccc"} 
-            />
-          </TouchableOpacity>
-        </View>
+    const handleSave = async () => {
+        if (content.trim() === '') {
+            Alert.alert("Fehler", "Der Inhalt darf nicht leer sein.");
+            return;
+        }
+        await updateDailyNote(student.id, note.id, content, title);
+        router.back();
+    };
 
-        <TextInput
-          multiline
-          style={styles.input}
-          value={content}
-          onChangeText={setContent}
-          placeholder="Notizinhalt..."
-          textAlignVertical="top"
-        />
+    const handleDelete = () => {
+        Alert.alert(
+            "Löschen",
+            "Möchtest du diese Notiz wirklich löschen?",
+            [
+                { text: "Abbrechen", style: "cancel" },
+                { 
+                    text: "Löschen", 
+                    style: "destructive", 
+                    onPress: async () => {
+                        await deleteDailyNote(student.id, note.id);
+                        router.back();
+                    } 
+                }
+            ]
+        );
+    };
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.buttonText}>Änderungen speichern</Text>
-        </TouchableOpacity>
+    const handleToggleFavorite = async () => {
+        await toggleFavoriteNote(student.id, note.id);
+    };
 
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDelete}
+    return (
+        <KeyboardAvoidingView 
+            style={styles.container} 
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={100}
         >
-          <Text style={styles.buttonText}>Eintrag löschen</Text>
-        </TouchableOpacity>
+            <Stack.Screen options={{ 
+                title: "Notiz bearbeiten",
+                headerRight: () => (
+                    <TouchableOpacity onPress={handleToggleFavorite} style={{ marginRight: 15 }}>
+                        <Ionicons 
+                            name={note.isFavorite ? "star" : "star-outline"} 
+                            size={24} 
+                            color={note.isFavorite ? "#FFD700" : "#333"} 
+                        />
+                    </TouchableOpacity>
+                )
+            }} />
 
-        <View style={{ height: 50 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+                <Text style={styles.label}>Titel</Text>
+                <TextInput
+                    style={styles.titleInput}
+                    value={title}
+                    onChangeText={setTitle}
+                    placeholder="Titel der Notiz..."
+                />
+
+                <Text style={styles.label}>Inhalt</Text>
+                <TextInput
+                    style={styles.contentInput}
+                    value={content}
+                    onChangeText={setContent}
+                    placeholder="Was ist heute passiert?"
+                    multiline
+                    textAlignVertical="top"
+                />
+
+                <View style={styles.buttonRow}>
+                    <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+                        <Text style={styles.deleteBtnText}>Löschen</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+                        <Text style={styles.saveBtnText}>Speichern</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff'
-  },
-  scrollContent: {
-    padding: 20
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15
-  },
-  headerInfo: {
-    flex: 1
-  },
-  starButton: {
-    padding: 5,
-  },
-  dateLabel: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'bold',
-    textTransform: 'uppercase'
-  },
-  studentName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333'
-  },
-  input: {
-    minHeight: 200,
-    fontSize: 16,
-    lineHeight: 24,
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#eee',
-    marginBottom: 20,
-    color: '#333'
-  },
-  saveButton: {
-    backgroundColor: '#b2fab4', 
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-    marginBottom: 12,
-    elevation: 2 
-  },
-  deleteButton: {
-    backgroundColor: '#ffaaaa', 
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-    elevation: 2
-  },
-  buttonText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#333'
-  },
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    marginBottom: 20
-  },
-  backBtn: {
-    padding: 10
-  },
-  backBtnText: {
-    color: '#007AFF',
-    fontWeight: 'bold'
-  }
+    container: { flex: 1, backgroundColor: '#fff' },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    scrollContent: { padding: 20 },
+    label: {
+        fontSize: 12,
+        color: '#999',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        marginBottom: 5,
+        marginLeft: 5
+    },
+    titleInput: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        marginBottom: 25,
+        paddingVertical: 8,
+        paddingHorizontal: 5,
+        color: '#333'
+    },
+    contentInput: {
+        fontSize: 16,
+        minHeight: 250,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 15,
+        padding: 15,
+        lineHeight: 24,
+        color: '#444',
+        borderWidth: 1,
+        borderColor: '#f0f0f0'
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 30,
+        gap: 15 
+    },
+
+    deleteBtn: {
+        flex: 1,
+        backgroundColor: '#ff6666',
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#333',
+        alignItems: 'center',
+        elevation: 2
+    },
+    deleteBtnText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333' 
+    },
+
+    saveBtn: {
+        flex: 1, 
+        backgroundColor: '#b2fab4',
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#333',
+        alignItems: 'center',
+        elevation: 2
+    },
+    saveBtnText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333'
+    }
 });
