@@ -23,8 +23,8 @@ interface StudentContextType {
     students: Student[];
     loading: boolean;
     deleteStudent: (id: string) => Promise<void>;
-    addStudent: (firstName: string, lastName: string) => Promise<void>;
-    updateStudent: (id: string, firstName: string, lastName: string) => Promise<void>;
+    addStudent: (firstName: string, lastName: string, avatarUri?: string) => Promise<void>;
+    updateStudent: (id: string, firstName: string, lastName: string, avatarUri?: string) => Promise<void>;
     updateGeneralNotes: (studentId: string, text: string) => Promise<void>;
     addDailyNote: (studentId: string, content: string, title?: string) => Promise<void>; 
     updateDailyNote: (studentId: string, noteId: string, newContent: string, title?: string) => Promise<void>;
@@ -63,20 +63,21 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     };
 
-    const addStudent = async (firstName: string, lastName: string) => {
+    const addStudent = async (firstName: string, lastName: string, avatarUri?: string) => {
         const newStudent: Student = {
             id: Date.now().toString(),
             firstName,
             lastName,
+            avatarUri,
             generalNotes: "",
             dailyNotes: []
         };
         await persistData([...students, newStudent]);
     };
 
-    const updateStudent = async (id: string, firstName: string, lastName: string) => {
+    const updateStudent = async (id: string, firstName: string, lastName: string, avatarUri?: string) => {
         const updatedList = students.map(s =>
-            s.id === id ? { ...s, firstName, lastName } : s
+            s.id === id ? { ...s, firstName, lastName, avatarUri } : s
         );
         await persistData(updatedList);
     };

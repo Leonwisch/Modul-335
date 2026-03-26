@@ -1,109 +1,181 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
+import { 
+    View, TextInput, TouchableOpacity, Text, 
+    Image, StyleSheet, ScrollView 
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-interface Props {
+interface StudentFormProps {
     onSave: (firstName: string, lastName: string) => void;
-    onDelete?: () => void;
+    onDelete?: () => void; 
+    buttonTitle: string;
+    selectedImage?: string;
+    onPickImage: () => void;
     initialFirstName?: string;
     initialLastName?: string;
-    buttonTitle?: string;
 }
 
-export const StudentForm = ({
-    onSave,
+export const StudentForm: React.FC<StudentFormProps> = ({ 
+    onSave, 
     onDelete,
-    initialFirstName = '',
-    initialLastName = '',
-    buttonTitle = 'Speichern'
-}: Props) => {
-
+    buttonTitle, 
+    selectedImage, 
+    onPickImage, 
+    initialFirstName = '', 
+    initialLastName = '' 
+}) => {
     const [firstName, setFirstName] = useState(initialFirstName);
     const [lastName, setLastName] = useState(initialLastName);
 
-
-    const handleDeletePress = () => {
-        if (!onDelete) return;
-
-        Alert.alert(
-            "Schüler löschen",
-            `Bist du sicher, dass du ${firstName} und alle Notizen unwiderruflich löschen möchtest?`,
-            [
-                { text: "Abbrechen", style: "cancel" },
-                {
-                    text: "Löschen",
-                    style: "destructive",
-                    onPress: () => onDelete()
-                }
-            ]
-        );
-    };
-
     return (
-        <View style={styles.form}>
-            <Text style={styles.label}>Vorname</Text>
-            <TextInput
-                style={styles.input}
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="z.B. Max"
-            />
+        <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
+            <TouchableOpacity onPress={onPickImage} style={styles.imageSelector}>
+                {selectedImage ? (
+                    <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+                ) : (
+                    <View style={styles.imagePlaceholder}>
+                        <Ionicons name="camera-outline" size={40} color="#999" />
+                        <Text style={styles.imageText}>Foto hinzufügen</Text>
+                    </View>
+                )}
+                <View style={styles.editIconBadge}>
+                    <Ionicons name="pencil" size={14} color="white" />
+                </View>
+            </TouchableOpacity>
 
-            <Text style={styles.label}>Nachname</Text>
-            <TextInput
-                style={styles.input}
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="z.B. Muster"
-            />
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Vorname</Text>
+                <TextInput 
+                    style={styles.input} 
+                    placeholder="z.B. Max" 
+                    value={firstName} 
+                    onChangeText={setFirstName} 
+                />
 
-            <TouchableOpacity
-                style={styles.button}
+                <Text style={styles.label}>Nachname</Text>
+                <TextInput 
+                    style={styles.input} 
+                    placeholder="z.B. Mustermann" 
+                    value={lastName} 
+                    onChangeText={setLastName} 
+                />
+            </View>
+
+            <TouchableOpacity 
+                style={styles.saveBtn} 
                 onPress={() => onSave(firstName, lastName)}
             >
-                <Text style={styles.buttonText}>{buttonTitle}</Text>
+                <Text style={styles.saveBtnText}>{buttonTitle}</Text>
             </TouchableOpacity>
 
             {onDelete && (
-                <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={handleDeletePress}
-                >
-                    <Text style={styles.buttonText}>Schüler löschen</Text>
+                <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
+                    <Ionicons name="trash-outline" size={20} color="#ff4444" />
+                    <Text style={styles.deleteBtnText}>Schüler löschen</Text>
                 </TouchableOpacity>
             )}
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    form: { padding: 20 },
-    label: { fontSize: 16, marginBottom: 5, fontWeight: 'bold' },
+    formContainer: { 
+        padding: 25, 
+        alignItems: 'center' 
+    },
+    imageSelector: { 
+        marginBottom: 30,
+        position: 'relative'
+    },
+    imagePlaceholder: {
+        width: 120, 
+        height: 120, 
+        borderRadius: 60,
+        backgroundColor: '#f8f8f8', 
+        justifyContent: 'center',
+        alignItems: 'center', 
+        borderWidth: 1, 
+        borderColor: '#ddd', 
+        borderStyle: 'dashed'
+    },
+    previewImage: { 
+        width: 120, 
+        height: 120, 
+        borderRadius: 60, 
+        borderWidth: 2, 
+        borderColor: '#333' 
+    },
+    editIconBadge: {
+        position: 'absolute',
+        bottom: 5,
+        right: 5,
+        backgroundColor: '#333',
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#fff'
+    },
+    imageText: { 
+        fontSize: 12, 
+        color: '#999', 
+        marginTop: 5 
+    },
+    inputGroup: {
+        width: '100%',
+        marginBottom: 20
+    },
+    label: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#999',
+        marginBottom: 5,
+        marginLeft: 5,
+        textTransform: 'uppercase'
+    },
     input: {
-        borderWidth: 1,
+        width: '100%', 
+        height: 55, 
+        borderWidth: 1, 
+        borderColor: '#eee',
+        backgroundColor: '#fdfdfd',
+        borderRadius: 12, 
+        paddingHorizontal: 15, 
+        marginBottom: 20, 
+        fontSize: 16,
+        color: '#333'
+    },
+    saveBtn: {
+        backgroundColor: '#b2fab4', 
+        padding: 16, 
+        borderRadius: 12,
+        width: '100%', 
+        alignItems: 'center', 
+        borderWidth: 1, 
         borderColor: '#333',
-        borderRadius: 10,
-        padding: 12,
-        marginBottom: 20,
-        fontSize: 16
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4
     },
-    button: {
-        backgroundColor: '#b2fab4',
-        padding: 15,
-        borderRadius: 10,
+    saveBtnText: { 
+        fontWeight: 'bold', 
+        fontSize: 16,
+        color: '#333'
+    },
+    deleteBtn: {
+        marginTop: 25,
+        flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#333'
+        padding: 10
     },
-
-    buttonText: { fontWeight: 'bold', fontSize: 16, color: '#333' },
-
-    deleteButton: {
-        backgroundColor: '#ffaaaa',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#333',
-        marginTop: 30,
-    },
+    deleteBtnText: {
+        color: '#ff4444',
+        fontWeight: 'bold',
+        marginLeft: 8,
+        fontSize: 14
+    }
 });
